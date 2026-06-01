@@ -8,38 +8,43 @@ class AboutSection extends StatelessWidget {
 
   static const _items = [
     {
-      'title': 'Para Neurodiversos',
+      'title': 'Nossa Missão',
       'desc':
-          'Desenvolvido com foco em TDAH, autismo, dislexia e outras variações cognitivas.',
+          'Revolucionar a educação através da tecnologia, tornando o aprendizado mais acessível e eficaz.',
     },
     {
-      'title': 'Aprendizagem Adaptativa',
+      'title': 'Nossa Visão',
       'desc':
-          'Conteúdo que se adapta ao seu ritmo, estilo e preferências de estudo.',
+          'Ser a principal ferramenta para estudantes em todo o mundo alcançarem seus objetivos acadêmicos.',
     },
     {
-      'title': 'Gamificação',
+      'title': 'Nossos Valores',
       'desc':
-          'Conquistas, moedas e desafios que tornam o aprendizado mais envolvente.',
+          'Inovação, acessibilidade, eficiência e respeito ao ritmo individual de cada estudante.',
     },
   ];
 
   @override
   Widget build(BuildContext context) {
+    final mobile = isMobile(context);
     return Container(
       color: const Color(0xFFF9F9F9),
       padding: EdgeInsets.symmetric(horizontal: hPad(context), vertical: 60),
       child: Column(
         children: [
           Text('Sobre o Mindly',
-              style: GoogleFonts.capriola(
-                  fontSize: 32, color: AppColors.navy)),
+              textAlign: TextAlign.center,
+              style:
+                  GoogleFonts.capriola(fontSize: 32, color: AppColors.navy)),
           const SizedBox(height: 20),
-          Text(
-            'Somos uma plataforma criada para apoiar mentes que funcionam de forma diferente — porque todo mundo merece aprender do seu jeito.',
-            style: GoogleFonts.openSans(
-                fontSize: 18, color: AppColors.grayText),
-            textAlign: TextAlign.center,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620),
+            child: Text(
+              'Mindly é uma plataforma inovadora projetada para ajudar estudantes a organizarem seus estudos de forma eficiente e motivadora. Com ferramentas inteligentes, acompanhamos seu progresso e adaptamos ao seu ritmo pessoal.',
+              style: GoogleFonts.openSans(
+                  fontSize: mobile ? 16 : 18, color: AppColors.grayText),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: 40),
           Wrap(
@@ -55,8 +60,9 @@ class AboutSection extends StatelessWidget {
                         borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 12)
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4))
                         ],
                       ),
                       child: Column(
@@ -64,12 +70,13 @@ class AboutSection extends StatelessWidget {
                         children: [
                           Text(item['title']!,
                               style: GoogleFonts.capriola(
-                                  fontSize: 16, color: AppColors.navy)),
+                                  fontSize: 18, color: AppColors.navy)),
                           const SizedBox(height: 10),
                           Text(item['desc']!,
                               style: const TextStyle(
                                   fontSize: 14,
-                                  color: AppColors.grayText)),
+                                  color: AppColors.grayText,
+                                  height: 1.5)),
                         ],
                       ),
                     ))

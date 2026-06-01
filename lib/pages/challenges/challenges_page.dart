@@ -57,17 +57,36 @@ class _ChallengesPageState extends State<ChallengesPage> {
 
   Future<void> _checkAnswer() async {
     if (_activeGame == null) return;
+    final auth = context.read<AuthProvider>();
     final correct = _answerCtrl.text.trim().toLowerCase() ==
         _activeGame!.answer.toLowerCase();
 
     if (correct) {
       setState(() => _message = '✅ Acertou!!');
-      final uid = _userId;
-      if (_activeGame!.challengeId != null && uid != null) {
-        await _service.addProgress(
-            uid, _activeGame!.challengeId!, _activeGame!.reward);
+      final uid = auth.session?.user.id;
+      final challengeId = _activeGame!.challengeId;
+      if (challengeId != null && uid != null) {
+        await _service.addProgress(uid, challengeId, _activeGame!.reward);
         await _load();
-        await context.read<AuthProvider>().refreshProfile();
+        await auth.refreshProfile();
+
+        // Concluiu o desafio?
+        final updated = _progressMap.where((p) => p.challengeId == challengeId);
+        if (updated.isNotEmpty && updated.first.progress >= 100 && mounted) {
+          setState(() {
+            _activeGame = null;
+            _message = '';
+          });
+          _answerCtrl.clear();
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(const SnackBar(
+              content: Text('🎉 Desafio concluído! Parabéns!'),
+              backgroundColor: AppColors.navy,
+              behavior: SnackBarBehavior.floating,
+            ));
+          return;
+        }
       }
     } else {
       setState(() => _message = '❌ Errou! Tente novamente.');
@@ -96,7 +115,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
               Row(
                 children: [
                   const Icon(Icons.track_changes,
-                      size: 36, color: AppColors.navy),
+                      size: 36, color: AppColors.blue),
                   const SizedBox(width: 10),
                   Text('Trilha de Aprendizagem',
                       style: GoogleFonts.capriola(
@@ -146,16 +165,16 @@ class _ChallengesPageState extends State<ChallengesPage> {
               ),
               const SizedBox(height: 40),
 
-              // Jogos
+              // Jogos de Prática
               _ChallengesSection(
-                title: 'Jogos',
+                title: 'Jogos de Prática',
                 child: Wrap(
                   spacing: 20,
                   runSpacing: 20,
                   children: games
                       .map((g) => _GameCard(
                           game: g,
-                          onFocus: () =>
+                          onPlay: () =>
                               setState(() => _activeGame = g)))
                       .toList(),
                 ),
@@ -178,24 +197,35 @@ class _ChallengesPageState extends State<ChallengesPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(_activeGame!.title,
-                          style: GoogleFonts.capriola(
-                              fontSize: 20, color: AppColors.navy)),
-                      GestureDetector(
-                        onTap: () => setState(() {
-                          _activeGame = null;
-                          _message = '';
-                          _answerCtrl.clear();
-                        }),
-                        child: const Icon(Icons.close),
-                      ),
-                    ],
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () => setState(() {
+                        _activeGame = null;
+                        _message = '';
+                        _answerCtrl.clear();
+                      }),
+                      child: const Icon(Icons.close, color: AppColors.graySoft),
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: AppColors.orange.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child:
+                        const Icon(Icons.bolt, size: 32, color: AppColors.orange),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(_activeGame!.title,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.capriola(
+                          fontSize: 20, color: AppColors.navy)),
+                  const SizedBox(height: 12),
                   Text(_activeGame!.prompt,
+                      textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 16)),
                   if (_activeGame!.hint != null) ...[
                     const SizedBox(height: 10),
@@ -226,7 +256,7 @@ class _ChallengesPageState extends State<ChallengesPage> {
                       onPressed: _checkAnswer,
                       style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.blue),
-                      child: const Text('Enviar'),
+                      child: const Text('Confirmar Resposta'),
                     ),
                   ),
                   if (_message.isNotEmpty) ...[
@@ -324,7 +354,7 @@ class _ChallengeCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  isCompleted ? 'Concluído' : 'Em Andamento',
+                  isCompleted ? '✓ Concluído' : 'Em Andamento',
                   style: TextStyle(
                     fontSize: 12,
                     color: isCompleted ? AppColors.green : AppColors.orange,
@@ -360,14 +390,16 @@ class _ChallengeCard extends StatelessWidget {
                 ),
               ] else if (isCompleted) ...[
                 const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
+                ElevatedButton(
+                  onPressed: null,
+                  style: ElevatedButton.styleFrom(
+                    disabledBackgroundColor: const Color(0xFFE0E0E0),
+                    disabledForegroundColor: AppColors.graySoft,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 8),
                     textStyle: const TextStyle(fontSize: 13),
                   ),
-                  child: const Text('Refazer'),
+                  child: const Text('Concluído'),
                 ),
               ],
             ],
@@ -380,8 +412,8 @@ class _ChallengeCard extends StatelessWidget {
 
 class _GameCard extends StatelessWidget {
   final Game game;
-  final VoidCallback onFocus;
-  const _GameCard({required this.game, required this.onFocus});
+  final VoidCallback onPlay;
+  const _GameCard({required this.game, required this.onPlay});
 
   @override
   Widget build(BuildContext context) {
@@ -397,22 +429,32 @@ class _GameCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              color: AppColors.orange.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.bolt, size: 28, color: AppColors.orange),
+          ),
+          const SizedBox(height: 14),
           Text(game.title,
-              style: GoogleFonts.capriola(
-                  fontSize: 16, color: AppColors.navy)),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.capriola(fontSize: 16, color: AppColors.navy)),
           const SizedBox(height: 8),
           Text(game.description,
+              textAlign: TextAlign.center,
               style: const TextStyle(
-                  fontSize: 13, color: AppColors.graySoft)),
+                  fontSize: 13, color: AppColors.graySoft, height: 1.5)),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: onFocus,
+            onPressed: onPlay,
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.blue,
                 shape: const StadiumBorder()),
-            child: const Text('Focar'),
+            child: const Text('Jogar'),
           ),
         ],
       ),

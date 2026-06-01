@@ -146,12 +146,6 @@ class _AppNavbarState extends State<AppNavbar> {
             _NavItem(label: 'Desempenho', path: '/desempenho', current: location),
             _NavItem(label: 'Desafios', path: '/desafios', current: location),
             _NavItem(label: 'Trilha', path: '/trilha', current: location),
-            if (user?.role == 'admin')
-              _NavItem(
-                  label: 'Painel Admin',
-                  path: '/admin',
-                  current: location,
-                  adminStyle: true),
             const SizedBox(width: 30),
           ],
           userArea,
@@ -165,12 +159,8 @@ class _NavItem extends StatelessWidget {
   final String label;
   final String path;
   final String current;
-  final bool adminStyle;
   const _NavItem(
-      {required this.label,
-      required this.path,
-      required this.current,
-      this.adminStyle = false});
+      {required this.label, required this.path, required this.current});
 
   bool get _isActive => current == path;
 
@@ -194,14 +184,8 @@ class _NavItem extends StatelessWidget {
             label,
             style: GoogleFonts.capriola(
               fontSize: 14,
-              color: adminStyle
-                  ? const Color(0xFFFFCC00)
-                  : _isActive
-                      ? AppColors.orange
-                      : AppColors.navy,
-              fontWeight: _isActive || adminStyle
-                  ? FontWeight.w600
-                  : FontWeight.w500,
+              color: _isActive ? AppColors.orange : AppColors.navy,
+              fontWeight: _isActive ? FontWeight.w600 : FontWeight.w500,
             ),
           ),
         ),

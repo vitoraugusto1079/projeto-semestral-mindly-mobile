@@ -14,7 +14,6 @@ import '../../pages/challenges/challenges_page.dart';
 import '../../pages/learning_path/learning_path_page.dart';
 import '../../pages/profile/profile_page.dart';
 import '../../pages/edit_profile/edit_profile_page.dart';
-import '../../pages/admin/admin_page.dart';
 import '../../pages/not_found/not_found_page.dart';
 import '../../widgets/layout/app_navbar.dart';
 import '../../widgets/common/top_blue_bar.dart';
@@ -42,7 +41,7 @@ class _RootShell extends StatelessWidget {
     if (location.startsWith('/desafios')) return 1;
     if (location.startsWith('/trilha')) return 2;
     if (location.startsWith('/desempenho')) return 3;
-    // perfil, editar-perfil, admin → aba Perfil
+    // perfil, editar-perfil → aba Perfil
     return 4;
   }
 
@@ -128,7 +127,6 @@ GoRouter buildRouter(BuildContext context) {
       if (auth.isLoggedIn && (loc == '/login' || loc == '/cadastro')) {
         return '/planner';
       }
-      if (loc == '/admin' && !auth.isAdmin) return '/perfil';
       return null;
     },
     routes: [
@@ -173,22 +171,12 @@ GoRouter buildRouter(BuildContext context) {
           ),
           GoRoute(
             path: '/perfil',
-            pageBuilder: (ctx, state) {
-              final auth = ctx.read<AuthProvider>();
-              return _fadePage(
-                state,
-                auth.isAdmin ? const AdminPage() : const ProfilePage(),
-              );
-            },
+            pageBuilder: (_, state) => _fadePage(state, const ProfilePage()),
           ),
           GoRoute(
             path: '/editar-perfil',
             pageBuilder: (_, state) =>
                 _fadePage(state, const EditProfilePage()),
-          ),
-          GoRoute(
-            path: '/admin',
-            pageBuilder: (_, state) => _fadePage(state, const AdminPage()),
           ),
           GoRoute(
             path: '/:any',

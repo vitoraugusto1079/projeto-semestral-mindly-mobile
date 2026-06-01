@@ -8,32 +8,37 @@ class NotFoundPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('404',
-                style: GoogleFonts.capriola(
-                    fontSize: 80,
-                    color: AppColors.blue,
-                    fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            Text('Página não encontrada',
-                style: GoogleFonts.capriola(
-                    fontSize: 24, color: AppColors.navy)),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => context.go('/'),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.blue,
-                  shape: const StadiumBorder(),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 32, vertical: 14)),
-              child: const Text('Voltar para o início'),
-            ),
-          ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 480),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('404',
+                  style: GoogleFonts.capriola(
+                      fontSize: 64,
+                      color: AppColors.blue,
+                      fontWeight: FontWeight.bold)),
+              const SizedBox(height: 14),
+              Text('Ops! Esta página não existe.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.openSans(
+                      fontSize: 16, color: AppColors.graySoft)),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => context.go('/'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.blue,
+                    foregroundColor: Colors.white,
+                    shape: const StadiumBorder(),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 26, vertical: 12)),
+                child: const Text('Voltar ao início'),
+              ),
+            ],
+          ),
         ),
       ),
     );

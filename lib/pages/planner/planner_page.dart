@@ -18,6 +18,20 @@ const _monthNames = [
 String _formatDateKey(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
+// Nomes completos para o cabeçalho de horários (equivale ao toLocaleDateString pt-BR).
+const _weekdaysLong = [
+  'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira',
+  'Sexta-feira', 'Sábado', 'Domingo',
+];
+const _monthsLong = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+];
+
+/// Ex.: "Segunda-feira, 5 de junho"
+String _formatLongDate(DateTime d) =>
+    '${_weekdaysLong[d.weekday - 1]}, ${d.day} de ${_monthsLong[d.month - 1]}';
+
 class PlannerPage extends StatefulWidget {
   const PlannerPage({super.key});
 
@@ -66,14 +80,37 @@ class _PlannerPageState extends State<PlannerPage> {
     }
   }
 
+  void _toast(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(msg),
+        backgroundColor: AppColors.navy,
+        behavior: SnackBarBehavior.floating,
+      ));
+  }
+
   /// Salva o horário; retorna true se bem-sucedido.
   Future<bool> _handleSave(Color selectedColor) async {
     final uid = _userId;
     if (_timeCtrl.text.isEmpty || _subjectCtrl.text.isEmpty || uid == null) {
       return false;
     }
+
+    // Validação de conflito — impede duas atividades no mesmo horário/dia.
+    final conflict = _todaySchedule.where((b) =>
+        b.time == _timeCtrl.text &&
+        (_editing == null || b.id != _editing!.id));
+    if (conflict.isNotEmpty) {
+      _toast(
+          'Conflito de horário: já existe "${conflict.first.subject}" às ${_timeCtrl.text}.');
+      return false;
+    }
+
     _selectedColor = selectedColor;
-    final colorHex = '#${selectedColor.value.toRadixString(16).substring(2)}';
+    final colorHex =
+        '#${selectedColor.toARGB32().toRadixString(16).substring(2)}';
     final fields = {
       'time': _timeCtrl.text,
       'subject': _subjectCtrl.text,
@@ -95,19 +132,22 @@ class _PlannerPageState extends State<PlannerPage> {
         _subjectCtrl.clear();
         _selectedColor = const Color(0xFF3B82F6);
       });
+      _toast('Horário salvo com sucesso!');
       return true;
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Erro ao salvar: $e')));
-      }
+      _toast('Erro ao salvar: $e');
       return false;
     }
   }
 
   Future<void> _handleDelete(PlannerBlock block) async {
-    await _service.remove(block.id);
-    setState(() => _blocks.removeWhere((b) => b.id == block.id));
+    try {
+      await _service.remove(block.id);
+      setState(() => _blocks.removeWhere((b) => b.id == block.id));
+      _toast('Horário excluído.');
+    } catch (e) {
+      _toast('Erro ao excluir: $e');
+    }
   }
 
   Color _parseColor(String hex) {
@@ -247,7 +287,7 @@ class _PlannerPageState extends State<PlannerPage> {
         children: [
           Text('Monte seu planejamento, organize seus horários',
               style: GoogleFonts.capriola(
-                  fontSize: 28,
+                  fontSize: isMobile(context) ? 24 : 32,
                   fontWeight: FontWeight.bold,
                   color: AppColors.navy),
               textAlign: TextAlign.center),
@@ -380,9 +420,9 @@ class _PlannerPageState extends State<PlannerPage> {
                               BorderSide(color: AppColors.orange, width: 3)),
                     ),
                     child: Text(
-                      _selectedDate.toLocal().toString().split(' ')[0],
+                      _formatLongDate(_selectedDate),
                       style: GoogleFonts.capriola(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: AppColors.navy),
                     ),

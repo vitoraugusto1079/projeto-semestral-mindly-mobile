@@ -14,40 +14,35 @@ class HeroSection extends StatelessWidget {
     final pad = hPad(context);
 
     final textBlock = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+          mobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Text(
-          'Aprenda do seu jeito,\nno seu ritmo.',
+          'Organize seus estudos\ncom a Mindly',
+          textAlign: mobile ? TextAlign.center : TextAlign.start,
           style: GoogleFonts.capriola(
-            fontSize: mobile ? 30 : 44,
+            fontSize: mobile ? 32 : 44,
             color: AppColors.navy,
             height: 1.2,
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          'O Mindly é uma plataforma de estudos pensada para mentes neurodiversas. Organize, evolua e se divirta aprendendo.',
-          style: GoogleFonts.openSans(
-            fontSize: mobile ? 15 : 18,
-            color: AppColors.graySoft,
-            height: 1.5,
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Text(
+            'Crie planos sob medida, acompanhe seu progresso e ganhe recompensas enquanto aprende.',
+            textAlign: mobile ? TextAlign.center : TextAlign.start,
+            style: GoogleFonts.openSans(
+              fontSize: mobile ? 15 : 18,
+              color: AppColors.graySoft,
+              height: 1.5,
+            ),
           ),
         ),
         const SizedBox(height: 30),
-        Wrap(
-          spacing: 16,
-          runSpacing: 12,
-          children: [
-            PrimaryButton(
-              label: 'Começar agora',
-              onPressed: () => context.go('/cadastro'),
-            ),
-            PrimaryButton(
-              label: 'Saiba mais',
-              variant: ButtonVariant.outline,
-              onPressed: () {},
-            ),
-          ],
+        PrimaryButton(
+          label: 'Crie uma conta',
+          onPressed: () => context.go('/cadastro'),
         ),
       ],
     );
@@ -66,11 +61,10 @@ class HeroSection extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(pad, 60, pad, 80),
       child: mobile
           ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                imageBlock,
-                const SizedBox(height: 32),
                 textBlock,
+                const SizedBox(height: 32),
+                imageBlock,
               ],
             )
           : Row(

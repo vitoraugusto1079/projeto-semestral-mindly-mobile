@@ -10,7 +10,7 @@ class ContactService {
     required String message,
     String? userId,
   }) async {
-    await _client.from('contact_tickets').insert({
+    await _client.from('tickets').insert({
       'name': name,
       'email': email,
       'subject': subject,

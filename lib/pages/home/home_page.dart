@@ -3,7 +3,6 @@ import '../../widgets/sections/hero_section.dart';
 import '../../widgets/sections/tools_section.dart';
 import '../../widgets/sections/banner_section.dart';
 import '../../widgets/sections/about_section.dart';
-import '../../widgets/sections/pricing_section.dart';
 import '../../widgets/sections/contact_section.dart';
 
 class HomePage extends StatelessWidget {
@@ -17,7 +16,6 @@ class HomePage extends StatelessWidget {
         ToolsSection(),
         BannerSection(),
         AboutSection(),
-        PricingSection(),
         ContactSection(),
       ],
     );

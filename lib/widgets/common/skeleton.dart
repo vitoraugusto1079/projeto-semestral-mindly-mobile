@@ -236,35 +236,3 @@ class _ScheduleSkeleton extends StatelessWidget {
     );
   }
 }
-
-/// Painel genérico de loading (página Admin).
-class SkeletonAdminPanel extends StatelessWidget {
-  const SkeletonAdminPanel({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SkeletonBox(width: 200, height: 28),
-        const SizedBox(height: 24),
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: List.generate(
-            4,
-            (_) => const SkeletonBox(width: 160, height: 80, radius: 14),
-          ),
-        ),
-        const SizedBox(height: 32),
-        Row(
-          children: const [
-            Expanded(child: SkeletonBox(height: 220, radius: 16)),
-            SizedBox(width: 16),
-            Expanded(child: SkeletonBox(height: 220, radius: 16)),
-          ],
-        ),
-      ],
-    );
-  }
-}
