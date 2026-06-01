@@ -1,4 +1,4 @@
-# App Mindkly Mobile
+# App Mindly Mobile
 
 A new Flutter project.
 
